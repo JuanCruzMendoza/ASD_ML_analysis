@@ -1,0 +1,6 @@
+# Pre-analysis
+--------------
+
+## Introducción
+
+## Métodos
