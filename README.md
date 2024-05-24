@@ -1,2 +1,4 @@
-# Template para el trabajo final del curso de Neuro/ML a gran escala
+# Final work for Neuro/Machine Learning course
+
+Work on the Autism Spectrum Disorder (ASD), using rs-fMRI to build a machine learning classifier able to distinguish ASD from typycal development individuals.
 
