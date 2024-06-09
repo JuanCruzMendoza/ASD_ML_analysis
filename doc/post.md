@@ -71,3 +71,7 @@ Lastly, we plotted the regions 76 and 69:
 
 
 ## Conclusion
+In the first place, the expected 82% accuracy for ASD-DiagNet model was not achieved, only a mean accuracy of 63.45%, which could be a sign of overfitting in the original paper.
+
+The best model in our study was kernel SVM, with a mean accuracy of 65.4%. Despite the fact that this result is far from 82% and 
+However, this performance is still not promising enough for a future clinical use 
