@@ -28,7 +28,7 @@ The model with the best overall metrics was SVM, although ASD-DiagNet and Logist
 
 <img src="../src/images/boxplots_accuracy.png" alt="boxplots_accuracy" width="500"/>
 
-It appears that the SVM was also the most stable model, contrary to ASD-DiagNet which had two outliers (likely due to the fact that nested CV was not used, only simple CV, since we decided to keep the hyperparameters from the original paper).
+It appears that the SVM was also the most stable model, contrary to ASD-DiagNet which had two outliers. This is likely due to the fact that nested CV was not used, only simple CV, since we decided to keep the hyperparameters from the original paper. As well as that, a different feature selection method was used for this model.
 
 After selecting the SVM model as the best one, we looked at the best hyperparameters for each split: 
 | Split | C     | Degree | Gamma   | Kernel   |
@@ -45,7 +45,7 @@ With this SVM model, we used the whole dataset for training and achieved a train
 
 Remember the atlas that was used (Bootstrap Analysis of Stable Clusters with 197 Regions Of Interest) did not have nominal names, so they are just identified by numbers and by their coordinates.
 
-<img src="../src/images/basc197.png" alt="basc197" width="350"/>
+<img src="../src/images/basc197.png" alt="basc197" width="400"/>
 
 In the following plot, we can see the most important correlations between ROIs:
 <img src="../src/images/shap_values_img.png" alt="shap_values_img" width="500"/>
@@ -71,7 +71,17 @@ Lastly, we plotted the regions 76 and 69:
 
 
 ## Conclusion
-In the first place, the expected 82% accuracy for ASD-DiagNet model was not achieved, only a mean accuracy of 63.45%, which could be a sign of overfitting in the original paper.
+This study offers a methodology for evaluating and comparing machine learning models for ASD and TD classification, using functional connectivity from rs-fMRI, with different feature selection methods, and intentds to interpret the resulting models with Shapley Additive Explanations.
 
-The best model in our study was kernel SVM, with a mean accuracy of 65.4%. Despite the fact that this result is far from 82% and 
-However, this performance is still not promising enough for a future clinical use 
+Firstly, the expected 82% accuracy for ASD-DiagNet model was not achieved, only a mean accuracy of 63.45%, which could be a sign of overfitting in the original paper. 
+
+On the other hand, the best model in our study was kernel SVM, with a mean accuracy of 65.4%. Despite the fact that this result is far from 82%, it is closer to the performance of other works which used most samples from the ABIDE dataset and only fMRI data (Xin Yang et al.$^{(1)}$ achieved 69% accuracy with a kernel SVM). As well as that, the best estimator only needed 200 features out of 19503, due to the feature selection with ANOVA and RFE, which made the training much faster and less prone to overfitting. 
+
+With the best model fitted to the entire dataset and the SHAP method, we were able to see which brain connections were more relevant for the classification model, which may serve as functional biomarkers for the diagnosis of ASD.
+
+However, it should be highlighted that a model with this performance is still not promising for clinical use. The main problem is that in order to train machine learning models with a very high number of features, it is generally necessary to have a large number of samples (especially if we were to explore other deeper Neural Networks models). Apart from the lack of data, the ABIDE dataset is multi-site, which makes it even harder for the model, and even autism itself is heterogeneous, meaning different types of ASD patients could present different brain functional connectivity.
+
+There are still a number of options to be explored: the gathering of more data of ASD patients, data augmentation methods, the discovery of newer and more optimal methods and ML models, using dynamic functional connectivity instead of the traditional static FC, combining fMRI data with other kind of data (like demographic or anatomic data). All of this could potentially lead to better results in the future and hopefully contribute to the diagnosis and a greater understanding of autism.
+
+\
+(1) Xin Yang, Ning Zhang, Paul Schrader, “A study of brain networks for autism spectrum disorder classification using resting-state functional connectivity”, Machine Learning with Applications, Volume 8, 2022.
