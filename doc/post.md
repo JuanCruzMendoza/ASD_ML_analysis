@@ -2,7 +2,7 @@
 --------------
 
 ## Results
-Firstly, we splitted the data (with 870 simples) with 5 Stratified folds, calculated the ANOVA F-score, taking the top 5000 features (from 19503), and did Recursive Feature Elimination. The number of features for each split was:
+Firstly, we splitted the data (with 870 samples) with 5 Stratified folds, calculated the ANOVA F-score, taking the top 5000 features (from 19503), and did Recursive Feature Elimination. The number of features for each split was:
 
 | Split | Number of features |
 | - | - |
@@ -28,7 +28,7 @@ The model with the best overall metrics was SVM, although ASD-DiagNet and Logist
 
 <img src="../src/images/boxplots_accuracy.png" alt="boxplots_accuracy" width="500"/>
 
-It appears that the SVM was also the most stable model, contrary to ASD-DiagNet which had two outliers. This is likely due to the fact that nested CV was not used, only simple CV, since we decided to keep the hyperparameters from the original paper. As well as that, a different feature selection method was used for this model.
+It appears that the SVM was also the most stable model, contrary to ASD-DiagNet which had two outliers. This is likely due to the fact that nested CV was not used, only simple CV, since we decided to keep the hyperparameters from the original paper. As well as that, a different feature selection method was used for this particular model.
 
 After selecting the SVM model as the best one, we looked at the best hyperparameters for each split: 
 | Split | C     | Degree | Gamma   | Kernel   |
@@ -64,6 +64,7 @@ Afterwards, we extracted the coordinates from the main ROIs:
 |90 | [-41.5, -34.2,  44.7] |
 |62 | [-10.2, -44.7,  36.4] |
 
+\
 Lastly, we plotted the regions 76 and 69:
 
 <img src="../src/images/roi_76_img.png" alt="roi_76_img" width="500"/>
