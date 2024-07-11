@@ -6,42 +6,48 @@ Firstly, we splitted the data (with 870 samples) with 5 Stratified folds, calcul
 
 | Split | Number of features |
 | - | - |
-| 1 | 392 |
-| 2 | 122 |
-| 3 | 671 |
-| 4 | 200 |
-| 5 | 252 |
+| 1 | 255 |
+| 2 | 583 |
+| 3 | 1227 |
+| 4 | 710 |
+| 5 | 1039 |
 
-It should be noted that in every split the number of features is lower than the number of samples, which intends to avoid the curse of dimensionality.
+It should be noted that in most splits the number of features is reasonable compared to the number of samples, which intends to avoid the curse of dimensionality.
 
 After having performed nested cross-validation for each model, as described in pre.md, the mean values across splits for each metric were the following: 
 
-| Model               | Accuracy | Precision | Recall | ROC AUC |
-|---------------------|----------|-----------|--------|---------|
-| ASD-DiagNet         | 0.6345   | 0.6655    | 0.6600 | 0.6370  |
-| SVM                 | 0.6540   | 0.6550    | 0.6072 | 0.6508  |
-| Logistic Regression | 0.6494   | 0.6490    | 0.5698 | 0.6438  |
-| XGBoost             | 0.5920   | 0.5910    | 0.5348 | 0.5879  |
+| Model               | Accuracy | Accuracy Train | Precision | Recall | ROC AUC |
+|---------------------|----------|----------------|-----------|--------|---------|
+| ASD-DiagNet         | 0.6345   | 0.8305         | 0.6655    | 0.6600 | 0.6370  |
+| SVM                 | 0.6460   | 0.8586         | 0.6456    | 0.5969 | 0.6425  |
+| Logistic Regression | 0.6460   | 0.8287         | 0.6451    | 0.5722 | 0.6408  |
+| XGBoost             | 0.6241   | 0.7848         | 0.6224    | 0.5298 | 0.6175  |
 
 \
-The model with the best overall metrics was SVM, although ASD-DiagNet and Logistic Regression had a similar performance. To see if the accuracy was stable across splits, we can observe the following graph:
+We decided to select XGBoost as the best model because, despite not having the best accuracy, the gap between the test accuracy and train accuracy is smaller, which means it is the one less likely to overfit. To see if the accuracy was stable across splits, we can observe the following graph:
 
 <img src="../src/images/boxplots_accuracy.png" alt="boxplots_accuracy" width="500"/>
 
-It appears that the SVM was also the most stable model, contrary to ASD-DiagNet which had two outliers. This is likely due to the fact that nested CV was not used, only simple CV, since we decided to keep the hyperparameters from the original paper. As well as that, a different feature selection method was used for this particular model.
+It appears that the XGBoost was stable, contrary to ASD-DiagNet which had two outliers. This is likely due to the fact that nested CV was not used, only simple CV, since we decided to keep the hyperparameters from the original paper. As well as that, a different feature selection method was used for this particular model.
 
-After selecting the SVM model as the best one, we looked at the best hyperparameters for each split: 
-| Split | C     | Degree | Gamma   | Kernel   |
-|-------|-------|--------|---------|----------|
-| 1     | 100   | 3      | 0.001   | sigmoid  |
-| 2     | 10    | 3      | 0.01    | rbf      |
-| 3     | 1000  | 3      | 0.0001  | rbf      |
-| 4     | 1     | 3      | 0.1     | rbf      |
-| 5     | 0.1   | 3      | 0.1     | poly     |
+We can also see how overfitting there was for each model, comparing training and test accuracy:
 
-It seems the Radial Basis Function kernel is preferable over the rest, the optimal value for gamma is 0.01, and we select C = 1 because this was the split with the best accuracy out of the five. For the same reason, we used the selected features by ANOVA and RFE of the fourth split, with a total of 200 features.
+<img src="../src/images/boxplots_accuracy_train.png" alt="boxplots_accuracy_train" width="500">
 
-With this SVM model, we used the whole dataset for training and achieved a training accuracy of 69.92%, which is reasonable compared to the previous error estimations. Then, this fitted model was used to calculate the SHAP values, indicating which were the most significant features.
+In the previous figure, we can see more clearly that the XGBoost model had less overfitting compared to the rest.
+
+After selecting the XGBoost model as the best one, we looked at the best hyperparameters for each split: 
+| Split | colsample_bytree | max_depth | subsample   |
+|-------|-------|--------|---------|
+| 1     | 0.7   | 5      | 0.5   | 
+| 2     | 0.5   | 5      | 0.6    | 
+| 3     | 0.6  | 5      | 0.5  | 
+| 4     | 0.7   | 5      | 0.5     | 
+| 5     | 0.7   | 5      | 0.6     | 
+
+It seems colsample_bytree = 0.7, subsample = 0.5 and max_depth = 5 are the optimal parameters. On the other hand, we selected features by ANOVA and RFE of the fourth split, since it was the split with the best accuracy out of the five, with a total of 710 features. 
+
+With this XGBoost model, we used the whole dataset for training and achieved a training accuracy of 80%, which is reasonable compared to the previous error estimations. Then, this fitted model was used to calculate the SHAP values, indicating which were the most significant features.
 
 Remember the atlas that was used (Bootstrap Analysis of Stable Clusters with 197 Regions Of Interest) did not have nominal names, so they are just identified by numbers and by their coordinates.
 
@@ -52,23 +58,24 @@ In the following plot, we can see the most important correlations between ROIs:
 
 (Note: class 0 was control and class 1 was for ASD, so the positive SHAP values tells us the correlation helped us identify ASD and the negative values, the TD)
 
-A higher correlation between ROIs 76 and 69 indicated the sample was more likely to belong to ASD (the mean correlation value across all samples was 0.2596 for TD and 0.2965 for ASD).
+A higher correlation between ROIs 48 and 16 indicated the sample was more likely to belong to controls (the mean correlation value across all samples was 0.5243 for TD and 0.4746 for ASD).
 
 Afterwards, we extracted the coordinates from the main ROIs:
 | ROI | Coordinates |
 | - | - |
-|76 | [-7,         49.6, 45.5       ] |
-|69 | [43.9, 25.1, 21.1] |
-|57 | [-45.9, -45.3, 48] |
-|30 | [ -5.2, -44.6,  22.9 ] |
-|90 | [-41.5, -34.2,  44.7] |
-|62 | [-10.2, -44.7,  36.4] |
+|48 | [-9.10 52.01 12.51] |
+|16| [ -5.55   -57.7     28.1125] |
+|61| [ 22.39  -71. -30.29] |
+|38| [-56.01  -4.74  10.        ] |
+|45| [ 50.69   6.8  -30.75] |
+|64| [-25.76  19.13  52.91] |
+|69| [43.92 25.06 21.12] |
 
 \
-Lastly, we plotted the regions 76 and 69:
+Lastly, we plotted the regions 48 and 16:
 
-<img src="../src/images/roi_76_img.png" alt="roi_76_img" width="500"/>
-<img src="../src/images/roi_69_img.png" alt="roi_69_img" width="500"/>
+<img src="../src/images/roi_48_img.png" alt="roi_48_img" width="500"/>
+<img src="../src/images/roi_16_img.png" alt="roi_16_img" width="500"/>
 
 
 ## Conclusion
@@ -76,7 +83,7 @@ This study offers a methodology for evaluating and comparing machine learning mo
 
 Firstly, the expected 82% accuracy for ASD-DiagNet model was not achieved, only a mean accuracy of 63.45%, which could be a sign of overfitting in the original paper. 
 
-On the other hand, the best model in our study was kernel SVM, with a mean accuracy of 65.4%. Despite the fact that this result is far from 82%, it is closer to the performance of other works which used most samples from the ABIDE dataset and only fMRI data (Xin Yang et al.$^{(1)}$ achieved 69% accuracy with a kernel SVM). As well as that, the best estimator only needed 200 features out of 19503, due to the feature selection with ANOVA and RFE, which made the training much faster and less prone to overfitting. 
+On the other hand, the best model in our study was XGBoost, with a mean accuracy of 62.41%, and we achieved 64.6% accuracy with a kernel SVM. Despite the fact that this result is far from 82%, it is closer to the performance of other works which used most samples from the ABIDE dataset and only fMRI data (Xin Yang et al.$^{(1)}$ achieved 69% accuracy with a kernel SVM). As well as that, the best estimator of the XGBoost model only needed 710 features out of 19503, due to the feature selection with ANOVA and RFE, which made the training much faster and less prone to overfitting. 
 
 With the best model fitted to the entire dataset and the SHAP method, we were able to see which brain connections were more relevant for the classification model, which may serve as functional biomarkers for the diagnosis of ASD.
 
